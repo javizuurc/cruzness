@@ -1,6 +1,19 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "plugins": [
+    "context-mode"
+  ],
   "mcp": {
+    "context-mode": {
+      "command": [
+        "context-mode",
+        "server",
+        "--agent",
+        "opencode"
+      ],
+      "enabled": true,
+      "type": "local"
+    },
     "servers": {
       "context7": {
         "type": "remote",
