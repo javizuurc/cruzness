@@ -2,62 +2,26 @@
 
 CruzNess is an AI harness baseline built on **opencode** as the main infrastructure. Copy it into any project to get a ready-to-use AI development setup focused on saving tokens.
 
-> Status: early stage. The baseline (MCPs, skills, plugins, hooks, custom agents) is being defined.
+> Status: early stage. v1 is opencode config + base agents only. Scope: [PRD](PRD.md).
 
 ## Why CruzNess?
 
-AI coding assistants waste tokens when every project re-invents its harness: same prompts, same MCP wiring, same agents, same conventions.
+AI coding assistants waste tokens when every project re-invents its harness. CruzNess ships one copyable baseline so you bring the harness instead of rebuilding it. Details: [PRD 1.1](PRD.md#11-problem-statement).
 
-CruzNess aims to fix that with one copyable baseline:
+## What you get (v1)
 
-- Reuse instead of rewire: bring the harness, don't rebuild it.
-- Token efficiency: purpose-built skills, agents and hooks over generic chat.
-- Consistency: same way of working across projects.
+- Copyable baseline for any project.
+- Base config that loads in opencode without manual fixes.
+- Base agents for common development tasks.
 
-## Features
+Acceptance criteria: [PRD FR-001..FR-003](PRD.md#21-functional-requirements).
 
-- **Copyable baseline** for any project.
-- **Custom agents** tuned for common development tasks.
-- **Skills and plugins** for repetitive workflows.
-- **Hooks** to automate harness behaviour.
-- **MCP-based context**: project memory and fresh docs without pasting blobs into chat.
-
-## Architecture
-
-opencode is the AI IDE; everything else plugs into it:
-
-```text
-project/
-└── cruzness baseline/
-    ├── opencode (ADE / runtime)
-    ├── skills + plugins (reusable workflows)
-    ├── custom agents (task specialists)
-    ├── hooks (automation)
-    └── MCPs (context providers, e.g. memory, docs)
-```
-
-- **opencode**: executes the harness, owns agents, skills, hooks and MCP wiring.
-- **Skills / plugins**: reusable procedures the agent follows instead of improvising.
-- **Custom agents**: bounded specialists (explore, implement, verify).
-- **Hooks**: event-driven automation around the workflow.
-- **MCPs**: external context on demand (memory, documentation).
-
-## Integrations
-
-CruzNess runs on [opencode](https://github.com/sst/opencode) as its ADE: it provides the agent runtime, skills, custom agents, hooks and MCP wiring that the baseline reuses in every project.
-
-| Tool | Role |
-|------|------|
-| opencode | ADE and harness runtime. Executes agents, skills, hooks and MCPs. |
-
-## Installation
+## Use it
 
 Requirements:
 
 - `git`
 - `opencode` installed and working
-
-First steps:
 
 ```sh
 git clone <cruzness-repo-url>
@@ -67,13 +31,15 @@ git clone <cruzness-repo-url>
 
 Then open your project with opencode and the baseline applies.
 
+Structure and data flow: [ARCHITECTURE](ARCHITECTURE.md).
+
 ## Configuration
 
-Customization via opencode profiles and project-local overrides (exact profiles to be defined as the baseline lands).
+v1 has no profiles. Copy the baseline as-is.
 
-## Roadmap
+## Vision
 
-No roadmap yet.
+Future ideal, not v1. Owner: [ARCHITECTURE 05](ARCHITECTURE.md#05-scalability--future-considerations).
 
 ## Contributing
 
