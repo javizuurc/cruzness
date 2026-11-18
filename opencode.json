@@ -4,17 +4,16 @@
     "context-mode"
   ],
   "mcp": {
-    "context-mode": {
-      "command": [
-        "context-mode",
-        "server",
-        "--agent",
-        "opencode"
-      ],
-      "enabled": true,
-      "type": "local"
-    },
     "servers": {
+      "context-mode": {
+        "command": [
+          "context-mode",
+          "server",
+          "--agent",
+          "opencode"
+        ],
+        "type": "local"
+      },
       "context7": {
         "type": "remote",
         "url": "https://mcp.context7.com/mcp"
@@ -22,11 +21,18 @@
       "github": {
         "type": "remote",
         "url": "https://api.githubcopilot.com/mcp/",
-        "enabled": true,
         "oauth": false,
         "headers": {
           "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}"
         }
+      },
+      "codebase-memory": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "codebase-memory-mcp"
+        ]
       }
     }
   }

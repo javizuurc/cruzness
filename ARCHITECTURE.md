@@ -41,7 +41,7 @@ Tools and technologies used in the project.
 - **Baseline code**: TypeScript, aligned with opencode's stack
 - **Package manager**: bun, if feasible ([TBD per PRD](PRD.md#3-constraints))
 
-Out of v1 (decided in [PRD 1.4](PRD.md#14-non-goals)): extra skills/plugins, bundled MCPs, profiles/advanced customization, automatic token measurement, multi-IDE support.
+Out of v1 (decided in [PRD 1.4](PRD.md#14-non-goals)):  profiles/advanced customization, automatic token measurement, multi-IDE support.
 
 ## 03 Project Structure
 
@@ -83,4 +83,4 @@ Key areas to consider as the product grows.
 - Define one reference task and record before/after tokens before claiming savings.
 - Pin the supported opencode version; re-verify on upgrade.
 - Repeat reference measurements 3x and compare averages (model output varies).
-- Consider profiles, bundled MCPs (memory, docs) and multi-IDE only after v1 ships.
+- Consider profiles and multi-IDE only after v1 ships.
