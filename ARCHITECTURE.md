@@ -48,6 +48,7 @@ A simplified view of the folder structure.
   README.md         # clone + copy usage (FR-001)
   opencode.json     # base config, loads cleanly (FR-002)
   agents/           # base agents, one line purpose each (FR-003)
+  skills/           # base skills (find-skills, doc-design, work-unit-commits, skill-*)
   # vision only, no file yet:
   # cruzness.yml    # per-project modules (e.g. frontend)
 ```
