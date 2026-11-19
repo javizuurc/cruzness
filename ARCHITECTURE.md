@@ -10,20 +10,14 @@ High-level overview of the project structure, tech stack, and how everything con
 
 A visual view of how the baseline works and the main pieces involved.
 
-```text
-Developer
-  (clone + copy)
-    |
-    v
-Target project + CruzNess baseline
-    |
-    v
-opencode (ADE / runtime)
-  |-- base config (loads without manual fixes)
-  |-- base agents (invokable specialists)
-    |
-    v
-Task execution (fewer steps, fewer tokens)
+```mermaid
+flowchart TD
+  Dev[Developer] -->|clone + copy| Target["Target project + CruzNess baseline"]
+  Target --> Runtime["opencode (ADE / runtime)"]
+  Runtime --> Config["base config (loads without manual fixes)"]
+  Runtime --> Agents["base agents (invokable specialists)"]
+  Config --> Task["Task execution (fewer steps, fewer tokens)"]
+  Agents --> Task
 ```
 
 Responses: agent output + file changes in the target project.
@@ -77,7 +71,7 @@ CruzNess has no runtime of its own. Execution behaviour belongs to opencode; thi
 
 Key areas to consider as the product grows.
 
-- Keep v1 to config + agents; defer skills/MCPs explicitly to avoid scope creep.
+- Keep v1 to config + agents.
 - Watch total MCPs/tools per agent to avoid context bloat and atrophy (no fixed budget yet, to be measured).
 - Vision (beyond v1): per-project YAML to enable integrations (e.g. frontend module bringing SEO + frontend specialist agents with their tools), settable per project. No schema frozen yet.
 - Define one reference task and record before/after tokens before claiming savings.
