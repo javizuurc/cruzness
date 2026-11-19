@@ -1,7 +1,8 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "plugins": [
-    "context-mode"
+    "context-mode",
+    "@dietrichgebert/ponytail"
   ],
   "mcp": {
     "servers": {
