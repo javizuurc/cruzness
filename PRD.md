@@ -27,7 +27,6 @@ A minimal copyable baseline built on opencode only: base configuration plus base
 Out of v1, per scope decision (opencode only):
 
 - Skills, plugins, hooks beyond the base agents.
-- MCPs (memory, docs) bundled by default.
 - Profiles and advanced customization.
 - Automatic token measurement tooling.
 - Multi-IDE support.

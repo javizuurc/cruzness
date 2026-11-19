@@ -1,0 +1,48 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": [
+    "context-mode",
+    "@dietrichgebert/ponytail"
+  ],
+  "mcp": {
+    "servers": {
+      "context-mode": {
+        "command": [
+          "context-mode",
+          "server",
+          "--agent",
+          "opencode"
+        ],
+        "type": "local"
+      },
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp"
+      },
+      "github": {
+        "type": "remote",
+        "url": "https://api.githubcopilot.com/mcp/",
+        "oauth": false,
+        "headers": {
+          "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}"
+        }
+      },
+      "codebase-memory": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "codebase-memory-mcp"
+        ]
+      },
+      "mermaid": {
+        "type": "local",
+        "command": [
+          "npx",
+          "-y",
+          "@fay-i/mermaid-mcp"
+        ]
+      }
+    }
+  }
+}
