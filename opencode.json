@@ -40,8 +40,12 @@
         "command": [
           "npx",
           "-y",
-          "@fay-i/mermaid-mcp"
-        ]
+          "@fay-i/mermaid-mcp",
+          "./data/mermaid-artifacts"
+        ],
+        "environment": {
+          "STORAGE_TYPE": "local"
+        }
       }
     }
   }
