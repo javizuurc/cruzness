@@ -1,3 +1,2 @@
-# local secrets - never commit
-.env
-!.env.example
+# mermaid MCP artifacts (generated SVG/PDF) - never commit
+/data/mermaid-artifacts/
