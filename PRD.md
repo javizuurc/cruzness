@@ -28,7 +28,6 @@ Out of v1, per scope decision (opencode only):
 
 - Skills, plugins, hooks beyond the base agents.
 - Profiles and advanced customization.
-- Automatic token measurement tooling.
 - Multi-IDE support.
 
 ---
@@ -39,11 +38,11 @@ Out of v1, per scope decision (opencode only):
 
 #### P0 (Must Have)
 
-| ID | Requirement | Acceptance Criteria |
-|----|-------------|---------------------|
+| ID     | Requirement                                      | Acceptance Criteria                                                                                          |
+| ------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | FR-001 | Copyable baseline layout with usage instructions | Cloning the repo and following the [README](README.md) yields the documented file layout in a target project |
-| FR-002 | Base opencode configuration | The shipped config loads in opencode without manual fixes |
-| FR-003 | Base agents shipped with the baseline | Each documented agent is invokable from opencode and its purpose is described in one line |
+| FR-002 | Base opencode configuration                      | The shipped config loads in opencode without manual fixes                                                    |
+| FR-003 | Base agents shipped with the baseline            | Each documented agent is invokable from opencode and its purpose is described in one line                    |
 
 #### P1 (Should Have)
 
@@ -55,11 +54,11 @@ Out of scope for v1. TBD.
 
 ### 2.2 Non-Functional Requirements
 
-| Category | Requirement | Target |
-|----------|-------------|--------|
-| Performance | Lower token spend on a reference task vs. no baseline | TBD (before/after comparison, reference task TBD) |
-| Portability | Baseline copies into any project without project-specific edits | Manual copy works on a fresh checkout |
-| Reliability | Shipped config and agents load cleanly | No load errors in opencode |
+| Category    | Requirement                                                     | Target                                            |
+| ----------- | --------------------------------------------------------------- | ------------------------------------------------- |
+| Performance | Lower token spend on a reference task vs. no baseline           | TBD (before/after comparison, reference task TBD) |
+| Portability | Baseline copies into any project without project-specific edits | Manual copy works on a fresh checkout             |
+| Reliability | Shipped config and agents load cleanly                          | No load errors in opencode                        |
 
 ---
 
@@ -74,30 +73,24 @@ Out of scope for v1. TBD.
 
 ## 4. Success Metrics
 
-| Metric | Current | Target | Measurement |
-|--------|---------|--------|-------------|
-| Token spend on reference task | TBD | Lower than without baseline | Same prompt and model with/without baseline; compare input+output tokens (reference task TBD) |
-| Steps per reference task (key) | TBD | Fewer than without baseline | Count of agent/tool steps to finish the reference task, with/without baseline |
-| Setup time in a new project | TBD | TBD | Minutes from clone to working baseline in a fresh project |
+Compare vanilla, GentleAI, and CruzNess on the same benchmark tasks, repository snapshot, model, and run conditions. Metrics are task success, steps, input-plus-output tokens, and wall-clock task execution time; setup time is optional and measured separately. Run each task three times per setup and report results per task. See [metrics/tasks.md](metrics/tasks.md) for task examples and scoring.
 
 ---
 
 ## 5. Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Scope creep (adding skills/MCPs before v1 lands) | Medium | Medium | Keep v1 to opencode config + agents; defer the rest explicitly |
-| Token saving unproven (no reference measurement yet) | High | Medium | Define one reference task and record before/after before claiming savings |
-| opencode drift (upstream changes break the baseline) | Medium | Medium | Pin the supported opencode version in the [README](README.md); re-verify on upgrade |
-| Measurement noise (model output varies run to run) | Medium | Low | Repeat the reference task 3 times and compare averages |
+| Risk                                                 | Likelihood | Impact | Mitigation                                                                          |
+| ---------------------------------------------------- | ---------- | ------ | ----------------------------------------------------------------------------------- |
+| Scope creep (adding skills/MCPs before v1 lands)     | Medium     | Medium | Keep v1 to opencode config + agents; defer the rest explicitly                      |
+| Token saving unproven (no reference measurement yet) | High       | Medium | Define one reference task and record before/after before claiming savings           |
+| opencode drift (upstream changes break the baseline) | Medium     | Medium | Pin the supported opencode version in the [README](README.md); re-verify on upgrade |
+| Measurement noise (model output varies run to run)   | Medium     | Low    | Repeat the reference task 3 times and compare averages                              |
 
 ---
 
 ## 6. Timeline
 
-| Milestone | Description | Target Date |
-|-----------|-------------|-------------|
-| M1 | v1 scope frozen | TBD |
-| M2 | Baseline ships (FR-001..FR-003 verifiable) | TBD |
-
-
+| Milestone | Description                                | Target Date |
+| --------- | ------------------------------------------ | ----------- |
+| M1        | v1 scope frozen                            | TBD         |
+| M2        | Baseline ships (FR-001..FR-003 verifiable) | TBD         |

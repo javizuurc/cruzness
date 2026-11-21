@@ -1,0 +1,14 @@
+{
+  "dataOrigin": "SYNTHETIC EXAMPLE - NOT BENCHMARK EVIDENCE",
+  "runs": [
+    { "id": "synthetic-vanilla-1", "setup": "vanilla", "minutes": 8 },
+    { "id": "synthetic-vanilla-2", "setup": "vanilla", "minutes": 9 },
+    { "id": "synthetic-vanilla-3", "setup": "vanilla", "minutes": 10 },
+    { "id": "synthetic-gentleai-1", "setup": "gentleai", "minutes": 12 },
+    { "id": "synthetic-gentleai-2", "setup": "gentleai", "minutes": 11 },
+    { "id": "synthetic-gentleai-3", "setup": "gentleai", "minutes": 13 },
+    { "id": "synthetic-cruzness-1", "setup": "cruzness", "minutes": 15 },
+    { "id": "synthetic-cruzness-2", "setup": "cruzness", "minutes": 13 },
+    { "id": "synthetic-cruzness-3", "setup": "cruzness", "minutes": 14 }
+  ]
+}
