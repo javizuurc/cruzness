@@ -31,6 +31,28 @@ git clone <cruzness-repo-url>
 
 Then open your project with opencode and the baseline applies.
 
+## Success metrics
+
+Run `npm test` for the offline CruzNess suite. For the live comparison, run the same tasks under OpenCode vanilla and CruzNess. See the [benchmark guide](metrics/benchmark.md) for task prompts, scoring, isolation checks, and observed results.
+
+From a scratch directory, import each sanitized export into a shared run file and compare the paired setups:
+
+```sh
+opencode session export <session-id> --sanitize > session.json
+node <cruzness-path>/scripts/metrics/metrics-import.mjs session.json runs.json --task fix-bug --prompt-hash sha256:replace-with-same-prompt-hash --setup cruzness --success true
+node <cruzness-path>/scripts/metrics/metrics.mjs runs.json --setups vanilla,cruzness
+```
+
+Omit `--setups` for the original vanilla/GentleAI/CruzNess report. To include optional setup times, pass `setup-times.json` before `--setups`. For setup time, start from a clean project clone, copy the baseline and verify it loads before stopping. Keep state/result files outside the project and use a new state file per clone:
+
+```sh
+node <cruzness-path>/scripts/metrics/setup-timer.mjs start <state.json> cruzness
+# copy the baseline and verify it loads
+node <cruzness-path>/scripts/metrics/setup-timer.mjs stop <state.json> setup-times.json
+```
+
+The timer records which setup was measured and requires the same project root and commit when stopped.
+
 Structure and data flow: [ARCHITECTURE](ARCHITECTURE.md).
 
 ## Configuration

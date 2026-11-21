@@ -1,0 +1,110 @@
+[
+  {
+    "dataOrigin": "SYNTHETIC EXAMPLE - NOT BENCHMARK EVIDENCE",
+    "task": "example-reference-task",
+    "setup": "vanilla",
+    "model": "example-model",
+    "promptHash": "sha256:synthetic-example",
+    "inputTokens": 500,
+    "outputTokens": 100,
+    "steps": 12,
+    "durationSeconds": 120,
+    "success": false
+  },
+  {
+    "dataOrigin": "SYNTHETIC EXAMPLE - NOT BENCHMARK EVIDENCE",
+    "task": "example-reference-task",
+    "setup": "vanilla",
+    "model": "example-model",
+    "promptHash": "sha256:synthetic-example",
+    "inputTokens": 520,
+    "outputTokens": 110,
+    "steps": 13,
+    "durationSeconds": 130,
+    "success": true
+  },
+  {
+    "dataOrigin": "SYNTHETIC EXAMPLE - NOT BENCHMARK EVIDENCE",
+    "task": "example-reference-task",
+    "setup": "vanilla",
+    "model": "example-model",
+    "promptHash": "sha256:synthetic-example",
+    "inputTokens": 510,
+    "outputTokens": 105,
+    "steps": 11,
+    "durationSeconds": 125,
+    "success": true
+  },
+  {
+    "dataOrigin": "SYNTHETIC EXAMPLE - NOT BENCHMARK EVIDENCE",
+    "task": "example-reference-task",
+    "setup": "gentleai",
+    "model": "example-model",
+    "promptHash": "sha256:synthetic-example",
+    "inputTokens": 430,
+    "outputTokens": 90,
+    "steps": 10,
+    "durationSeconds": 100,
+    "success": true
+  },
+  {
+    "dataOrigin": "SYNTHETIC EXAMPLE - NOT BENCHMARK EVIDENCE",
+    "task": "example-reference-task",
+    "setup": "gentleai",
+    "model": "example-model",
+    "promptHash": "sha256:synthetic-example",
+    "inputTokens": 450,
+    "outputTokens": 92,
+    "steps": 10,
+    "durationSeconds": 98,
+    "success": true
+  },
+  {
+    "dataOrigin": "SYNTHETIC EXAMPLE - NOT BENCHMARK EVIDENCE",
+    "task": "example-reference-task",
+    "setup": "gentleai",
+    "model": "example-model",
+    "promptHash": "sha256:synthetic-example",
+    "inputTokens": 440,
+    "outputTokens": 95,
+    "steps": 9,
+    "durationSeconds": 102,
+    "success": true
+  },
+  {
+    "dataOrigin": "SYNTHETIC EXAMPLE - NOT BENCHMARK EVIDENCE",
+    "task": "example-reference-task",
+    "setup": "cruzness",
+    "model": "example-model",
+    "promptHash": "sha256:synthetic-example",
+    "inputTokens": 400,
+    "outputTokens": 80,
+    "steps": 9,
+    "durationSeconds": 90,
+    "success": true
+  },
+  {
+    "dataOrigin": "SYNTHETIC EXAMPLE - NOT BENCHMARK EVIDENCE",
+    "task": "example-reference-task",
+    "setup": "cruzness",
+    "model": "example-model",
+    "promptHash": "sha256:synthetic-example",
+    "inputTokens": 410,
+    "outputTokens": 85,
+    "steps": 8,
+    "durationSeconds": 96,
+    "success": true
+  },
+  {
+    "dataOrigin": "SYNTHETIC EXAMPLE - NOT BENCHMARK EVIDENCE",
+    "task": "example-reference-task",
+    "setup": "cruzness",
+    "model": "example-model",
+    "promptHash": "sha256:synthetic-example",
+    "inputTokens": 405,
+    "outputTokens": 82,
+    "steps": 9,
+    "durationSeconds": 93,
+    "success": true
+  }
+]
