@@ -2,17 +2,18 @@
 
 CruzNess is an AI harness baseline built on **opencode** as the main infrastructure. Copy it into any project to get a ready-to-use AI development setup focused on saving tokens.
 
-> Status: early stage. v1 is opencode config + base agents only. Scope: [PRD](PRD.md).
+> Status: early stage. The baseline includes OpenCode config, base agents, and project preferences in `cruzness.yml`. Scope: [PRD](PRD.md).
 
 ## Why CruzNess?
 
 AI coding assistants waste tokens when every project re-invents its harness. CruzNess ships one copyable baseline so you bring the harness instead of rebuilding it. Details: [PRD 1.1](PRD.md#11-problem-statement).
 
-## What you get (v1)
+## What you get
 
 - Copyable baseline for any project.
 - Base config that loads in opencode without manual fixes.
 - Base agents for common development tasks.
+- `cruzness.yml` for project-level CruzNess preferences.
 
 Acceptance criteria: [PRD FR-001..FR-003](PRD.md#21-functional-requirements).
 
@@ -57,11 +58,18 @@ Structure and data flow: [ARCHITECTURE](ARCHITECTURE.md).
 
 ## Configuration
 
-v1 has no profiles. Copy the baseline as-is.
+`cruzness.yml` holds project-level CruzNess preferences. Set `notifications.task_complete` to `true` to express a preference for a notification when a task completes, or `false` to opt out:
+
+```yaml
+notifications:
+  task_complete: false
+```
+
+OpenCode Desktop may show its own session notifications independently; it controls delivery through its app and operating-system settings. `cruzness.yml` is CruzNess's preference file, not an OpenCode configuration file.
 
 ## Vision
 
-Future ideal, not v1. Owner: [ARCHITECTURE 05](ARCHITECTURE.md#05-scalability--future-considerations).
+Additional project-specific modules and integrations remain future work. Owner: [ARCHITECTURE 05](ARCHITECTURE.md#05-scalability--future-considerations).
 
 ## Contributing
 

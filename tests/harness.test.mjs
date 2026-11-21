@@ -1,8 +1,9 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
-const credentialName = /(?:api[_-]?key|access[_-]?token|client[_-]?secret|private[_-]?key|password|secret|token)/i;
+const credentialName =
+  /(?:api[_-]?key|access[_-]?token|client[_-]?secret|private[_-]?key|password|secret|token)/i;
 const placeholder = /^(?:|your[-_].*|.*(?:example|placeholder|changeme|replace[-_ ]?me|todo).*)$/i;
 const credentialPatterns = [
   /\bgh[pousr]_[A-Za-z0-9_]{20,}\b/i,
@@ -17,7 +18,7 @@ function credentialLeaks(contents) {
     const match = line.match(/^\s*([^#=\s][^=]*)=(.*)$/);
     if (!match) continue;
     const [, key, rawValue] = match;
-    const value = rawValue.trim().replace(/^['"]|['"]$/g, '');
+    const value = rawValue.trim().replace(/^['"]|['"]$/g, "");
     if (credentialName.test(key.trim()) && !placeholder.test(value)) {
       leaks.push(`credential-like key ${key.trim()}`);
     }
@@ -25,10 +26,15 @@ function credentialLeaks(contents) {
   return leaks;
 }
 
-describe('environment configuration', () => {
-  it('documents every environment variable referenced by the OpenCode config', async () => {
-    const config = await readFile(new URL('../opencode.json', import.meta.url), 'utf8');
-    const example = await readFile(new URL('../.env.example', import.meta.url), 'utf8');
+describe("environment configuration", () => {
+  it("includes the task-completion notification preference in cruzness.yml", async () => {
+    const config = await readFile(new URL("../cruzness.yml", import.meta.url), "utf8");
+    assert.match(config, /^notifications:\r?\n  task_complete: (?:true|false)\r?$/m);
+  });
+
+  it("documents every environment variable referenced by the OpenCode config", async () => {
+    const config = await readFile(new URL("../opencode.json", import.meta.url), "utf8");
+    const example = await readFile(new URL("../.env.example", import.meta.url), "utf8");
     const references = [...config.matchAll(/\{env:([A-Z_][A-Z0-9_]*)\}/g)].map((match) => match[1]);
     const documented = new Set(
       example
@@ -38,16 +44,24 @@ describe('environment configuration', () => {
     );
 
     for (const name of new Set(references)) {
-      assert.ok(documented.has(name), `${name} is referenced by opencode.json but missing from .env.example`);
+      assert.ok(
+        documented.has(name),
+        `${name} is referenced by opencode.json but missing from .env.example`,
+      );
     }
   });
 
-  it('rejects recognizable hard-coded credentials in the OpenCode config', async () => {
-    const config = await readFile(new URL('../opencode.json', import.meta.url), 'utf8');
-    assert.deepEqual(credentialLeaks(config), [], 'opencode.json contains a hard-coded credential');
+  it("rejects recognizable hard-coded credentials in the OpenCode config", async () => {
+    const config = await readFile(new URL("../opencode.json", import.meta.url), "utf8");
+    assert.deepEqual(credentialLeaks(config), [], "opencode.json contains a hard-coded credential");
   });
 
-  it('detects credential-like keys generically without reading .env values', () => {
-    assert.equal(credentialLeaks('GITHUB_PERSONAL_ACCESS_TOKEN=live-value-123\nSERVICE_API_KEY=private-value-456').length, 2);
+  it("detects credential-like keys generically without reading .env values", () => {
+    assert.equal(
+      credentialLeaks(
+        "GITHUB_PERSONAL_ACCESS_TOKEN=live-value-123\nSERVICE_API_KEY=private-value-456",
+      ).length,
+      2,
+    );
   });
 });
