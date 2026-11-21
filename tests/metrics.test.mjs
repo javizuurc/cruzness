@@ -257,6 +257,58 @@ describe("metrics comparison", () => {
     }
   });
 
+  it("rejects different models or prompts across repetitions of a task", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "cruzness-metrics-"));
+    try {
+      const runsPath = join(dir, "runs.json");
+      const run = (setup, model, promptHash) => ({
+        task: "ref-1",
+        setup,
+        model,
+        promptHash,
+        inputTokens: 1,
+        outputTokens: 1,
+        steps: 1,
+        durationSeconds: 1,
+        success: true,
+      });
+      await writeFile(
+        runsPath,
+        JSON.stringify([
+          run("vanilla", "model-a", "prompt-a"),
+          run("gentleai", "model-a", "prompt-a"),
+          run("cruzness", "model-a", "prompt-a"),
+          run("vanilla", "model-b", "prompt-b"),
+          run("gentleai", "model-b", "prompt-b"),
+          run("cruzness", "model-b", "prompt-b"),
+        ]),
+      );
+      const result = spawnSync(process.execPath, [script, runsPath], { encoding: "utf8" });
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /Task ref-1 must use the same model across repetitions/);
+
+      await writeFile(
+        runsPath,
+        JSON.stringify([
+          run("vanilla", "model-a", "prompt-a"),
+          run("gentleai", "model-a", "prompt-a"),
+          run("cruzness", "model-a", "prompt-a"),
+          run("vanilla", "model-a", "prompt-b"),
+          run("gentleai", "model-a", "prompt-b"),
+          run("cruzness", "model-a", "prompt-b"),
+        ]),
+      );
+      const promptResult = spawnSync(process.execPath, [script, runsPath], { encoding: "utf8" });
+      assert.equal(promptResult.status, 1);
+      assert.match(
+        promptResult.stderr,
+        /Task ref-1 must use the same promptHash across repetitions/,
+      );
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   it("times setup only from a clean clone and appends the elapsed minutes", async () => {
     const dir = await mkdtemp(join(tmpdir(), "cruzness-setup-"));
     const source = join(dir, "source");

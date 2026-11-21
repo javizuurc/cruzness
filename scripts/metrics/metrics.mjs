@@ -70,6 +70,14 @@ try {
       }
     }
   }
+  for (const task of new Set(runs.map((run) => run.task))) {
+    const taskRuns = runs.filter((run) => run.task === task);
+    for (const field of ["model", "promptHash"]) {
+      if (new Set(taskRuns.map((run) => run[field])).size !== 1) {
+        throw new Error(`Task ${task} must use the same ${field} across repetitions`);
+      }
+    }
+  }
 
   const taskNames = [...new Set(runs.map((run) => run.task))];
   const tasks = Object.fromEntries(
