@@ -15,18 +15,19 @@ Developers using AI coding assistants overspend tokens because every project re-
 
 ### 1.2 Solution Summary
 
-A minimal copyable baseline built on opencode only: base configuration plus base agents, so a new project starts from a standard harness aimed at spending fewer tokens.
+A minimal copyable baseline built on OpenCode: its base configuration and agents, plus a local plugin that consumes project preferences from CruzNess-owned YAML.
 
 ### 1.3 Goals
 
 - **Primary**: Save tokens, verified by comparing tokens before/after on a reference task.
 - **Secondary**: Standardize setup across projects reusing the same baseline.
+- Keep per-project CruzNess preferences in `cruzness.yml`.
 
 ### 1.4 Non-Goals
 
 Out of v1, per scope decision (opencode only):
 
-- Skills, plugins, hooks beyond the base agents.
+- Plugins and hooks beyond the CruzNess configuration/notification integration.
 - Profiles and advanced customization.
 - Multi-IDE support.
 
@@ -38,11 +39,12 @@ Out of v1, per scope decision (opencode only):
 
 #### P0 (Must Have)
 
-| ID     | Requirement                                      | Acceptance Criteria                                                                                          |
-| ------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| FR-001 | Copyable baseline layout with usage instructions | Cloning the repo and following the [README](README.md) yields the documented file layout in a target project |
-| FR-002 | Base opencode configuration                      | The shipped config loads in opencode without manual fixes                                                    |
-| FR-003 | Base agents shipped with the baseline            | Each documented agent is invokable from opencode and its purpose is described in one line                    |
+| ID     | Requirement                                      | Acceptance Criteria                                                                                                                                                                         |
+| ------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FR-001 | Copyable baseline layout with usage instructions | Cloning the repo and following the [README](README.md) yields the documented file layout in a target project                                                                                |
+| FR-002 | Base opencode configuration                      | The shipped config loads in opencode without manual fixes                                                                                                                                   |
+| FR-003 | Base agents shipped with the baseline            | Each documented agent is invokable from opencode and its purpose is described in one line                                                                                                   |
+| FR-004 | Project preferences in `cruzness.yml`            | The OpenCode plugin reads the local YAML; `notifications.task_complete: true` notifies on successful task completion, `false` suppresses it, and the tracked `.example` provides a template |
 
 #### P1 (Should Have)
 
@@ -54,11 +56,11 @@ Out of scope for v1. TBD.
 
 ### 2.2 Non-Functional Requirements
 
-| Category    | Requirement                                                     | Target                                            |
-| ----------- | --------------------------------------------------------------- | ------------------------------------------------- |
-| Performance | Lower token spend on a reference task vs. no baseline           | TBD (before/after comparison, reference task TBD) |
-| Portability | Baseline copies into any project without project-specific edits | Manual copy works on a fresh checkout             |
-| Reliability | Shipped config and agents load cleanly                          | No load errors in opencode                        |
+| Category    | Requirement                                              | Target                                                           |
+| ----------- | -------------------------------------------------------- | ---------------------------------------------------------------- |
+| Performance | Lower token spend on a reference task vs. no baseline    | TBD (before/after comparison, reference task TBD)                |
+| Portability | Baseline copies into any project with documented setup   | Manual copy and dependency installation work on a fresh checkout |
+| Reliability | Shipped OpenCode config, plugin, and agents load cleanly | No load errors in opencode                                       |
 
 ---
 
@@ -66,8 +68,8 @@ Out of scope for v1. TBD.
 
 - Must integrate with opencode only in v1.
 - Must run wherever opencode runs.
-- Baseline code in TypeScript, aligned with opencode's stack for now.
-- Package manager: bun, if feasible (TBD).
+- OpenCode plugin code must use the supported OpenCode plugin API.
+- Node.js and npm provide the YAML configuration reader and its dependency.
 
 ---
 
@@ -81,7 +83,7 @@ Compare vanilla, GentleAI, and CruzNess on the same benchmark tasks, repository 
 
 | Risk                                                 | Likelihood | Impact | Mitigation                                                                          |
 | ---------------------------------------------------- | ---------- | ------ | ----------------------------------------------------------------------------------- |
-| Scope creep (adding skills/MCPs before v1 lands)     | Medium     | Medium | Keep v1 to opencode config + agents; defer the rest explicitly                      |
+| Scope creep (adding skills/MCPs before v1 lands)     | Medium     | Medium | Keep runtime behavior in OpenCode; defer unimplemented integrations explicitly      |
 | Token saving unproven (no reference measurement yet) | High       | Medium | Define one reference task and record before/after before claiming savings           |
 | opencode drift (upstream changes break the baseline) | Medium     | Medium | Pin the supported opencode version in the [README](README.md); re-verify on upgrade |
 | Measurement noise (model output varies run to run)   | Medium     | Low    | Repeat the reference task 3 times and compare averages                              |

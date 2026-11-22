@@ -2,19 +2,23 @@
 
 CruzNess is an AI harness baseline built on **opencode** as the main infrastructure. Copy it into any project to get a ready-to-use AI development setup focused on saving tokens.
 
-> Status: early stage. v1 is opencode config + base agents only. Scope: [PRD](PRD.md).
+> Status: early stage. The baseline includes OpenCode config, base agents, and project preferences in `cruzness.yml`. Scope: [PRD](PRD.md).
 
 ## Why CruzNess?
 
 AI coding assistants waste tokens when every project re-invents its harness. CruzNess ships one copyable baseline so you bring the harness instead of rebuilding it. Details: [PRD 1.1](PRD.md#11-problem-statement).
 
-## What you get (v1)
+## What you get
 
 - Copyable baseline for any project.
-- Base config that loads in opencode without manual fixes.
+- Auto-discovered harness plugins; no project plugin list to maintain.
+- Context Mode and Ponytail installed as harness dependencies.
+- MCP servers configured and distributed by the CruzNess plugin.
 - Base agents for common development tasks.
+- Local OpenCode plugin for project notification preferences.
+- `cruzness.yml` for project-level CruzNess preferences.
 
-Acceptance criteria: [PRD FR-001..FR-003](PRD.md#21-functional-requirements).
+Acceptance criteria: [PRD FR-001..FR-004](PRD.md#21-functional-requirements).
 
 ## Use it
 
@@ -22,11 +26,14 @@ Requirements:
 
 - `git`
 - `opencode` installed and working
+- `node` 24.15+ and `npm`
 
 ```sh
 git clone <cruzness-repo-url>
 # install opencode per its official docs
 # copy the cruzness baseline into your project
+cp cruzness.yml.example cruzness.yml
+npm install
 ```
 
 Then open your project with opencode and the baseline applies.
@@ -57,11 +64,21 @@ Structure and data flow: [ARCHITECTURE](ARCHITECTURE.md).
 
 ## Configuration
 
-v1 has no profiles. Copy the baseline as-is.
+`cruzness.yml` holds project-level CruzNess preferences. It is ignored by Git; start by copying `cruzness.yml.example`. Set `notifications.task_complete` to `true` to receive a system notification after a successful task in the OpenCode TUI, or `false` to opt out:
+
+```yaml
+notifications:
+  task_complete: true
+```
+
+The local CruzNess OpenCode plugin reads this file and listens for task completion. Notifications appear when the TUI is blurred, subject to operating-system notification settings. OpenCode Desktop's own notifications remain independently controlled by its app and operating-system settings.
+
+The plugin also registers CruzNess's MCP servers, so projects only need to load the plugin; server definitions stay with the harness.
+The GitHub MCP reads `GITHUB_PERSONAL_ACCESS_TOKEN` from the OpenCode process environment and remains disabled when it is unset.
 
 ## Vision
 
-Future ideal, not v1. Owner: [ARCHITECTURE 05](ARCHITECTURE.md#05-scalability--future-considerations).
+Additional project-specific modules and integrations remain future work. Owner: [ARCHITECTURE 05](ARCHITECTURE.md#05-scalability--future-considerations).
 
 ## Contributing
 

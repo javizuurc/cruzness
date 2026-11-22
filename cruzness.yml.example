@@ -1,0 +1,2 @@
+notifications:
+  task_complete: true
