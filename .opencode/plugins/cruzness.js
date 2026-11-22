@@ -1,5 +1,5 @@
 import { Plugin } from "@opencode/plugin";
-import { registerCruznessMcpServers } from "../../../src/cruzness-config.mjs";
+import { registerCruznessMcpServers } from "../../src/cruzness-config.mjs";
 
 export default Plugin.define({
   id: "cruzness",

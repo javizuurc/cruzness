@@ -49,16 +49,18 @@ describe("environment configuration", () => {
       await readFile(new URL("../.opencode/plugins/ponytail.js", import.meta.url), "utf8"),
       /from ["']@dietrichgebert\/ponytail["']/,
     );
-    const cruznessPlugin = JSON.parse(
-      await readFile(
-        new URL("../.opencode/plugins/cruzness/package.json", import.meta.url),
-        "utf8",
-      ),
+    const cruznessServer = await readFile(
+      new URL("../.opencode/plugins/cruzness.js", import.meta.url),
+      "utf8",
     );
-    assert.deepEqual(cruznessPlugin.exports, {
-      ".": "./index.js",
-      "./tui": "./tui.js",
-    });
+    assert.match(cruznessServer, /id:\s*"cruzness"/);
+    assert.match(cruznessServer, /registerCruznessMcpServers/);
+    const cruznessTui = await readFile(
+      new URL("../.opencode/plugins/cruzness-notifications.js", import.meta.url),
+      "utf8",
+    );
+    assert.match(cruznessTui, /id:\s*"cruzness\.notifications"/);
+    assert.match(cruznessTui, /registerTaskCompletionNotification/);
     assert.equal((await import("../.opencode/plugins/context-mode.js")).default.id, "context-mode");
     assert.equal((await import("../.opencode/plugins/ponytail.js")).default.id, "ponytail");
     await assert.rejects(readFile(new URL("../opencode.json", import.meta.url)), {

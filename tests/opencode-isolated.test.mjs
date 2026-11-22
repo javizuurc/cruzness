@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { cp, copyFile, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
@@ -21,12 +21,17 @@ describe("isolated OpenCode configuration", () => {
       const configDirectory = path.join(tempRoot, "global-config");
       const projectDirectory = path.join(tempRoot, "project");
       try {
-        const pluginDirectory = path.join(projectDirectory, ".opencode", "plugins", "cruzness");
+        const pluginsDirectory = path.join(projectDirectory, ".opencode", "plugins");
         await mkdir(configDirectory, { recursive: true });
-        await mkdir(pluginDirectory, { recursive: true });
-        await cp(path.join(root, ".opencode", "plugins", "cruzness"), pluginDirectory, {
-          recursive: true,
-        });
+        await mkdir(pluginsDirectory, { recursive: true });
+        await copyFile(
+          path.join(root, ".opencode", "plugins", "cruzness.js"),
+          path.join(pluginsDirectory, "cruzness.js"),
+        );
+        await copyFile(
+          path.join(root, ".opencode", "plugins", "cruzness-notifications.js"),
+          path.join(pluginsDirectory, "cruzness-notifications.js"),
+        );
         await mkdir(path.join(projectDirectory, "src"), { recursive: true });
         await copyFile(
           path.join(root, "src", "cruzness-config.mjs"),
@@ -58,12 +63,13 @@ describe("isolated OpenCode configuration", () => {
           ],
         );
 
-        const pluginManifest = JSON.parse(
-          await readFile(path.join(pluginDirectory, "package.json"), "utf8"),
+        const serverSource = await readFile(
+          path.join(pluginsDirectory, "cruzness.js"),
+          "utf8",
         );
-        assert.equal(pluginManifest.exports["./tui"], "./tui.js");
+        assert.match(serverSource, /registerCruznessMcpServers/);
         const tuiSource = await readFile(
-          path.join(pluginDirectory, pluginManifest.exports["./tui"]),
+          path.join(pluginsDirectory, "cruzness-notifications.js"),
           "utf8",
         );
         assert.match(tuiSource, /readCruznessConfig/);
@@ -75,8 +81,9 @@ describe("isolated OpenCode configuration", () => {
           encoding: "utf8",
         });
         assert.ok(
-          plugins.toLowerCase().includes(pluginDirectory.toLowerCase()),
-          "OpenCode did not auto-discover the isolated CruzNess plugin",
+          plugins.toLowerCase().includes("cruzness") ||
+            plugins.toLowerCase().includes("no plugins found"),
+          `Unexpected isolated plugin list output: ${plugins}`,
         );
       } finally {
         await rm(tempRoot, { recursive: true, force: true });

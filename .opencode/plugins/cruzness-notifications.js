@@ -2,7 +2,7 @@ import { Plugin } from "@opencode/plugin/tui";
 import {
   readCruznessConfig,
   registerTaskCompletionNotification,
-} from "../../../src/cruzness-config.mjs";
+} from "../../src/cruzness-config.mjs";
 
 export default Plugin.define({
   id: "cruzness.notifications",
