@@ -15,11 +15,14 @@ flowchart TD
   Dev[Developer] -->|clone + copy| Target["Target project + CruzNess baseline"]
   Target --> Runtime["opencode (ADE / runtime)"]
   Runtime --> Config["OpenCode config (loads without manual fixes)"]
-  Runtime --> Cruzness["cruzness.yml (project preferences)"]
+  Runtime --> CruznessPlugin["CruzNess OpenCode plugin"]
+  CruznessPlugin --> MCP["CruzNess MCP servers"]
+  CruznessPlugin --> Cruzness["cruzness.yml (project preferences)"]
   Runtime --> Agents["base agents (invokable specialists)"]
   Config --> Task["Task execution (fewer steps, fewer tokens)"]
   Agents --> Task
-  Cruzness -->|preference only| Task
+  Cruzness --> CruznessPlugin
+  CruznessPlugin --> Notification["System notification"]
 ```
 
 Responses: agent output + file changes in the target project.
@@ -27,15 +30,15 @@ Responses: agent output + file changes in the target project.
 - **Developer**: clones CruzNess, copies the baseline into any project.
 - **opencode**: executes the harness, owns config, agents and wiring.
 - **Baseline**: OpenCode config, base agents, and project preferences ([FR-002..FR-004](PRD.md#21-functional-requirements)).
-- **Target project**: where the work happens; baseline adds no runtime dependency.
+- **Target project**: where work happens; the CruzNess plugin runs inside OpenCode, not as a separate service.
 
 ## 02 Tech Stack
 
 Tools and technologies used in the project.
 
 - **ADE / Runtime**: opencode (only supported runtime in v1)
-- **Baseline code**: TypeScript, aligned with opencode's stack
-- **Package manager**: bun, if feasible ([TBD per PRD](PRD.md#3-constraints))
+- **Baseline code**: JavaScript/TypeScript, aligned with OpenCode's plugin stack
+- **Package manager**: npm for the YAML parser dependency
 
 Out of v1 (decided in [PRD 1.4](PRD.md#14-non-goals)): profiles/advanced customization, automatic token measurement, multi-IDE support.
 
@@ -46,10 +49,11 @@ A simplified view of the folder structure.
 ```text
 ./
   ARCHITECTURE.md   # this overview
-  PRD.md            # v1 scope FR-001..FR-003
+  PRD.md            # scope and acceptance criteria
   README.md         # clone + copy usage (FR-001)
-  opencode.json     # base OpenCode config, loads cleanly (FR-002)
-  cruzness.yml      # project-level CruzNess preferences
+  package.json      # harness runtime dependencies
+  .opencode/plugins/ # auto-discovered plugins and adapters (FR-002)
+  cruzness.yml.example # tracked project preference template
   agents/           # base agents, one line purpose each (FR-003)
   skills/           # base skills (find-skills, doc-design, work-unit-commits, skill-*)
 ```
@@ -57,24 +61,25 @@ A simplified view of the folder structure.
 - [`README.md`](README.md): how to clone and copy the baseline ([FR-001](PRD.md#21-functional-requirements)).
 - [`PRD.md`](PRD.md): frozen v1 scope and acceptance criteria.
 - `ARCHITECTURE.md`: this overview, kept in sync with the two above.
-- `opencode.json` + `agents/`: OpenCode runtime config and agents.
-- `cruzness.yml`: CruzNess-owned project preferences; OpenCode does not read it.
+- `.opencode/plugins/` + `agents/`: auto-discovered harness plugins and agents.
+- `cruzness.yml.example`: tracked template; the local `cruzness.yml` is Git-ignored.
+- `.opencode/plugins/cruzness/`: local OpenCode plugin that reads the preference and handles notifications.
 
 ## 04 Data Flow
 
-CruzNess has no runtime of its own. Execution behaviour belongs to opencode; `cruzness.yml` records project preferences but does not itself change OpenCode behavior.
+CruzNess has no standalone runtime. Execution behaviour belongs to opencode; its local plugin reads `cruzness.yml` and applies supported preferences.
 
-1. Developer clones the repo and copies the baseline into the target project.
-2. Target is opened with opencode; shipped config loads.
-3. Developer invokes a base agent for the task.
-4. opencode executes (tools, model loop) — not detailed here, see opencode docs.
-5. Reference task is compared before/after to verify token saving ([metrics](PRD.md#4-success-metrics)).
+1. Developer copies the baseline into a target project, installs npm dependencies, and copies `cruzness.yml.example` to `cruzness.yml`.
+2. OpenCode loads its project config and CruzNess plugin; the plugin registers its MCP servers and reads the local YAML.
+3. The developer invokes an agent; OpenCode executes the task.
+4. If enabled, the plugin sends a system notification after successful task completion.
+5. A reference task is compared before/after to verify token saving ([metrics](PRD.md#4-success-metrics)).
 
 ## 05 Scalability & Future Considerations
 
 Key areas to consider as the product grows.
 
-- Keep runtime behavior in OpenCode; do not claim preferences are enforced until an integration consumes them.
+- Add preferences only when the OpenCode plugin consumes and tests them.
 - Watch total MCPs/tools per agent to avoid context bloat and atrophy (no fixed budget yet, to be measured).
 - Extend `cruzness.yml` with project-specific modules and integrations as they are implemented.
 - Define one reference task and record before/after tokens before claiming savings.

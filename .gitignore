@@ -1,3 +1,4 @@
 # mermaid MCP artifacts (generated SVG/PDF) - never commit
 /data/mermaid-artifacts/
 node_modules/
+/cruzness.yml

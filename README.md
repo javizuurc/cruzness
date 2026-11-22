@@ -11,11 +11,14 @@ AI coding assistants waste tokens when every project re-invents its harness. Cru
 ## What you get
 
 - Copyable baseline for any project.
-- Base config that loads in opencode without manual fixes.
+- Auto-discovered harness plugins; no project plugin list to maintain.
+- Context Mode and Ponytail installed as harness dependencies.
+- MCP servers configured and distributed by the CruzNess plugin.
 - Base agents for common development tasks.
+- Local OpenCode plugin for project notification preferences.
 - `cruzness.yml` for project-level CruzNess preferences.
 
-Acceptance criteria: [PRD FR-001..FR-003](PRD.md#21-functional-requirements).
+Acceptance criteria: [PRD FR-001..FR-004](PRD.md#21-functional-requirements).
 
 ## Use it
 
@@ -23,11 +26,14 @@ Requirements:
 
 - `git`
 - `opencode` installed and working
+- `node` 24.15+ and `npm`
 
 ```sh
 git clone <cruzness-repo-url>
 # install opencode per its official docs
 # copy the cruzness baseline into your project
+cp cruzness.yml.example cruzness.yml
+npm install
 ```
 
 Then open your project with opencode and the baseline applies.
@@ -58,14 +64,17 @@ Structure and data flow: [ARCHITECTURE](ARCHITECTURE.md).
 
 ## Configuration
 
-`cruzness.yml` holds project-level CruzNess preferences. Set `notifications.task_complete` to `true` to express a preference for a notification when a task completes, or `false` to opt out:
+`cruzness.yml` holds project-level CruzNess preferences. It is ignored by Git; start by copying `cruzness.yml.example`. Set `notifications.task_complete` to `true` to receive a system notification after a successful task in the OpenCode TUI, or `false` to opt out:
 
 ```yaml
 notifications:
-  task_complete: false
+  task_complete: true
 ```
 
-OpenCode Desktop may show its own session notifications independently; it controls delivery through its app and operating-system settings. `cruzness.yml` is CruzNess's preference file, not an OpenCode configuration file.
+The local CruzNess OpenCode plugin reads this file and listens for task completion. Notifications appear when the TUI is blurred, subject to operating-system notification settings. OpenCode Desktop's own notifications remain independently controlled by its app and operating-system settings.
+
+The plugin also registers CruzNess's MCP servers, so projects only need to load the plugin; server definitions stay with the harness.
+The GitHub MCP reads `GITHUB_PERSONAL_ACCESS_TOKEN` from the OpenCode process environment and remains disabled when it is unset.
 
 ## Vision
 

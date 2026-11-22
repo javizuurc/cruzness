@@ -1,6 +1,9 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 
 const credentialName =
   /(?:api[_-]?key|access[_-]?token|client[_-]?secret|private[_-]?key|password|secret|token)/i;
@@ -27,15 +30,81 @@ function credentialLeaks(contents) {
 }
 
 describe("environment configuration", () => {
-  it("includes the task-completion notification preference in cruzness.yml", async () => {
-    const config = await readFile(new URL("../cruzness.yml", import.meta.url), "utf8");
+  it("provides an example with the task-completion preference", async () => {
+    const config = await readFile(new URL("../cruzness.yml.example", import.meta.url), "utf8");
     assert.match(config, /^notifications:\r?\n  task_complete: (?:true|false)\r?$/m);
   });
 
-  it("documents every environment variable referenced by the OpenCode config", async () => {
-    const config = await readFile(new URL("../opencode.json", import.meta.url), "utf8");
+  it("ships third-party plugins as harness dependencies and auto-discovered local adapters", async () => {
+    const packageJson = JSON.parse(
+      await readFile(new URL("../package.json", import.meta.url), "utf8"),
+    );
+    assert.equal(packageJson.dependencies["context-mode"], "2.2.2");
+    assert.equal(packageJson.dependencies["@dietrichgebert/ponytail"], "5.3.3");
+    assert.match(
+      await readFile(new URL("../.opencode/plugins/context-mode.js", import.meta.url), "utf8"),
+      /from ["']context-mode["']/,
+    );
+    assert.match(
+      await readFile(new URL("../.opencode/plugins/ponytail.js", import.meta.url), "utf8"),
+      /from ["']@dietrichgebert\/ponytail["']/,
+    );
+    const cruznessPlugin = JSON.parse(
+      await readFile(
+        new URL("../.opencode/plugins/cruzness/package.json", import.meta.url),
+        "utf8",
+      ),
+    );
+    assert.deepEqual(cruznessPlugin.exports, {
+      ".": "./index.js",
+      "./tui": "./tui.js",
+    });
+    assert.equal((await import("../.opencode/plugins/context-mode.js")).default.id, "context-mode");
+    assert.equal((await import("../.opencode/plugins/ponytail.js")).default.id, "ponytail");
+    await assert.rejects(readFile(new URL("../opencode.json", import.meta.url)), {
+      code: "ENOENT",
+    });
+    await assert.rejects(readFile(new URL("../.opencode/opencode.json", import.meta.url)), {
+      code: "ENOENT",
+    });
+  });
+
+  it("keeps MCP server configuration in the CruzNess plugin", async () => {
+    const source = await readFile(new URL("../src/cruzness-config.mjs", import.meta.url), "utf8");
+    assert.match(source, /context\.mcp\.transform/);
+  });
+
+  it("ignores the local config while keeping the example trackable", async () => {
+    const directory = path.join(os.tmpdir(), "opencode");
+    await mkdir(directory, { recursive: true });
+    const repo = await mkdtemp(path.join(directory, "cruzness-ignore-"));
+    const git = (args) => spawnSync("git", args, { cwd: repo, stdio: "ignore" });
+    try {
+      await copyFile(new URL("../.gitignore", import.meta.url), path.join(repo, ".gitignore"));
+      await copyFile(
+        new URL("../cruzness.yml.example", import.meta.url),
+        path.join(repo, "cruzness.yml.example"),
+      );
+      await writeFile(path.join(repo, "cruzness.yml"), "notifications:\n  task_complete: true\n");
+      assert.equal(git(["init", "--quiet"]).status, 0);
+      assert.equal(git(["add", "--all"]).status, 0);
+      assert.equal(git(["check-ignore", "--quiet", "cruzness.yml"]).status, 0);
+      assert.equal(git(["ls-files", "--error-unmatch", "cruzness.yml"]).status, 1);
+      assert.equal(git(["ls-files", "--error-unmatch", "cruzness.yml.example"]).status, 0);
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+
+  it("documents every environment variable referenced by the harness configuration", async () => {
+    const pluginConfig = await readFile(
+      new URL("../src/cruzness-config.mjs", import.meta.url),
+      "utf8",
+    );
     const example = await readFile(new URL("../.env.example", import.meta.url), "utf8");
-    const references = [...config.matchAll(/\{env:([A-Z_][A-Z0-9_]*)\}/g)].map((match) => match[1]);
+    const references = [...pluginConfig.matchAll(/process\.env\.([A-Z_][A-Z0-9_]*)/g)].map(
+      (match) => match[1],
+    );
     const documented = new Set(
       example
         .split(/\r?\n/)
@@ -46,14 +115,21 @@ describe("environment configuration", () => {
     for (const name of new Set(references)) {
       assert.ok(
         documented.has(name),
-        `${name} is referenced by opencode.json but missing from .env.example`,
+        `${name} is referenced by harness configuration but missing from .env.example`,
       );
     }
   });
 
-  it("rejects recognizable hard-coded credentials in the OpenCode config", async () => {
-    const config = await readFile(new URL("../opencode.json", import.meta.url), "utf8");
-    assert.deepEqual(credentialLeaks(config), [], "opencode.json contains a hard-coded credential");
+  it("rejects recognizable hard-coded credentials in the harness configuration", async () => {
+    const pluginConfig = await readFile(
+      new URL("../src/cruzness-config.mjs", import.meta.url),
+      "utf8",
+    );
+    assert.deepEqual(
+      credentialLeaks(pluginConfig),
+      [],
+      "Harness plugin configuration contains a hard-coded credential",
+    );
   });
 
   it("detects credential-like keys generically without reading .env values", () => {
