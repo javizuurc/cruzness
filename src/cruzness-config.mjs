@@ -1,6 +1,15 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { parse } from "yaml";
+import { normalizeFrontendTools } from "./frontend-config.mjs";
+
+export {
+  frontendAgentIds,
+  frontendAgentPermissions,
+  frontendSkillIds,
+  normalizeFrontendTools,
+  registerFrontendMcpServers,
+} from "./frontend-config.mjs";
 
 const mcpServers = {
   "context-mode": {
@@ -49,7 +58,13 @@ export async function readCruznessConfig(directory) {
   try {
     source = await readFile(path.join(directory, "cruzness.yml"), "utf8");
   } catch (error) {
-    if (error.code === "ENOENT") return { notifications: { task_complete: false } };
+    if (error.code === "ENOENT") {
+      return {
+        notifications: { task_complete: false },
+        frontend: false,
+        frontendTools: {},
+      };
+    }
     throw error;
   }
 
@@ -68,7 +83,22 @@ export async function readCruznessConfig(directory) {
     throw new TypeError("notifications.task_complete must be a boolean");
   }
 
-  return { notifications: { task_complete: taskComplete } };
+  const frontend = config.frontend ?? false;
+  if (typeof frontend !== "boolean") {
+    throw new TypeError("frontend must be a boolean");
+  }
+
+  // Optional role overrides: solo con sentido cuando frontend es true.
+  if (config.frontend_mcp !== undefined) {
+    throw new TypeError("frontend_mcp was replaced by frontendTools (rol -> servidor/definicion)");
+  }
+  const frontendTools = normalizeFrontendTools(config.frontendTools ?? {}, Object.keys(mcpServers));
+
+  return {
+    notifications: { task_complete: taskComplete },
+    frontend,
+    frontendTools,
+  };
 }
 
 export function registerTaskCompletionNotification(context, enabled) {

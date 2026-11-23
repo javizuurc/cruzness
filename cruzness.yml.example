@@ -1,2 +1,15 @@
 notifications:
   task_complete: true
+frontend: false
+frontendTools:
+  seo:
+    name: my-seo
+    type: remote
+    url: https://example.test/mcp
+  analytics:
+    - name: my-analytics
+      type: remote
+      url: https://example.test/mcp
+    - name: my-traffic
+      type: remote
+      url: https://example.test/mcp

@@ -33,6 +33,8 @@ describe("environment configuration", () => {
   it("provides an example with the task-completion preference", async () => {
     const config = await readFile(new URL("../cruzness.yml.example", import.meta.url), "utf8");
     assert.match(config, /^notifications:\r?\n  task_complete: (?:true|false)\r?$/m);
+    assert.match(config, /^frontend: (?:true|false)\r?$/m);
+    assert.ok(!config.includes("frontend_mcp"), "no legacy frontend_mcp key");
   });
 
   it("ships third-party plugins as harness dependencies and auto-discovered local adapters", async () => {
@@ -56,11 +58,31 @@ describe("environment configuration", () => {
     assert.match(cruznessServer, /id:\s*"cruzness"/);
     assert.match(cruznessServer, /registerCruznessMcpServers/);
     const cruznessTui = await readFile(
-      new URL("../.opencode/plugins/cruzness-notifications.js", import.meta.url),
+      new URL("../.opencode/plugins/cruzness-notifications/tui.js", import.meta.url),
       "utf8",
     );
-    assert.match(cruznessTui, /id:\s*"cruzness\.notifications"/);
+    assert.match(cruznessTui, /id:\s*"cruzness\.notifications\.tui"/);
+    assert.match(cruznessTui, /@opencode\/plugin\/tui/);
     assert.match(cruznessTui, /registerTaskCompletionNotification/);
+    const notificationsServer = await readFile(
+      new URL("../.opencode/plugins/cruzness-notifications/index.js", import.meta.url),
+      "utf8",
+    );
+    assert.match(notificationsServer, /from ["']@opencode\/plugin["']/);
+    assert.doesNotMatch(notificationsServer, /@opencode\/plugin\/tui/);
+    // A flat file under .opencode/plugins loads as the server part, where the TUI context is absent.
+    for (const file of ["context-mode.js", "cruzness.js", "cruzness-frontend.js", "ponytail.js"]) {
+      const source = await readFile(new URL(`../.opencode/plugins/${file}`, import.meta.url), "utf8");
+      assert.doesNotMatch(source, /@opencode\/plugin\/tui/, `${file} must not load the TUI SDK`);
+      assert.doesNotMatch(source, /context\.(?:data|attention)\./, `${file} must not use TUI context`);
+    }
+    const cruznessFrontend = await readFile(
+      new URL("../.opencode/plugins/cruzness-frontend.js", import.meta.url),
+      "utf8",
+    );
+    assert.match(cruznessFrontend, /id:\s*"cruzness\.frontend"/);
+    assert.match(cruznessFrontend, /registerFrontendMcpServers/);
+    assert.match(cruznessFrontend, /config\.frontend/);
     assert.equal((await import("../.opencode/plugins/context-mode.js")).default.id, "context-mode");
     assert.equal((await import("../.opencode/plugins/ponytail.js")).default.id, "ponytail");
     await assert.rejects(readFile(new URL("../opencode.json", import.meta.url)), {
@@ -69,6 +91,17 @@ describe("environment configuration", () => {
     await assert.rejects(readFile(new URL("../.opencode/opencode.json", import.meta.url)), {
       code: "ENOENT",
     });
+  });
+
+  it("ships configuration sources without a byte-order mark", async () => {
+    for (const file of ["cruzness.yml.example", ".env.example", "package.json"]) {
+      const bytes = await readFile(new URL(`../${file}`, import.meta.url));
+      assert.notDeepEqual(
+        [...bytes.subarray(0, 3)],
+        [0xef, 0xbb, 0xbf],
+        `${file} must not start with a BOM`,
+      );
+    }
   });
 
   it("keeps MCP server configuration in the CruzNess plugin", async () => {
@@ -88,25 +121,33 @@ describe("environment configuration", () => {
         path.join(repo, "cruzness.yml.example"),
       );
       await writeFile(path.join(repo, "cruzness.yml"), "notifications:\n  task_complete: true\n");
+      await writeFile(path.join(repo, ".env.local"), "MY_CUSTOM_TOOL_TOKEN=secret\n");
       assert.equal(git(["init", "--quiet"]).status, 0);
       assert.equal(git(["add", "--all"]).status, 0);
       assert.equal(git(["check-ignore", "--quiet", "cruzness.yml"]).status, 0);
       assert.equal(git(["ls-files", "--error-unmatch", "cruzness.yml"]).status, 1);
       assert.equal(git(["ls-files", "--error-unmatch", "cruzness.yml.example"]).status, 0);
+      assert.equal(git(["check-ignore", "--quiet", ".env.local"]).status, 0);
+      assert.equal(git(["ls-files", "--error-unmatch", ".env.local"]).status, 1);
     } finally {
       await rm(repo, { recursive: true, force: true });
     }
   });
 
   it("documents every environment variable referenced by the harness configuration", async () => {
-    const pluginConfig = await readFile(
+    const coreConfig = await readFile(
       new URL("../src/cruzness-config.mjs", import.meta.url),
       "utf8",
     );
-    const example = await readFile(new URL("../.env.example", import.meta.url), "utf8");
-    const references = [...pluginConfig.matchAll(/process\.env\.([A-Z_][A-Z0-9_]*)/g)].map(
-      (match) => match[1],
+    const frontendConfig = await readFile(
+      new URL("../src/frontend-config.mjs", import.meta.url),
+      "utf8",
     );
+    const example = await readFile(new URL("../.env.example", import.meta.url), "utf8");
+    const references = [
+      ...coreConfig.matchAll(/process\.env\.([A-Z_][A-Z0-9_]*)/g),
+      ...frontendConfig.matchAll(/process\.env\.([A-Z_][A-Z0-9_]*)/g),
+    ].map((match) => match[1]);
     const documented = new Set(
       example
         .split(/\r?\n/)
@@ -123,14 +164,23 @@ describe("environment configuration", () => {
   });
 
   it("rejects recognizable hard-coded credentials in the harness configuration", async () => {
-    const pluginConfig = await readFile(
+    const coreConfig = await readFile(
       new URL("../src/cruzness-config.mjs", import.meta.url),
       "utf8",
     );
+    const frontendConfig = await readFile(
+      new URL("../src/frontend-config.mjs", import.meta.url),
+      "utf8",
+    );
     assert.deepEqual(
-      credentialLeaks(pluginConfig),
+      credentialLeaks(coreConfig),
       [],
       "Harness plugin configuration contains a hard-coded credential",
+    );
+    assert.deepEqual(
+      credentialLeaks(frontendConfig),
+      [],
+      "Frontend package configuration contains a hard-coded credential",
     );
   });
 
