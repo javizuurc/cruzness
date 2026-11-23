@@ -2,3 +2,14 @@
 /data/mermaid-artifacts/
 node_modules/
 /cruzness.yml
+# per-user secrets: each user defines their own (see frontend/README.md)
+/.env.local
+# frontend package materialized by frontend/scripts/sync-frontend.mjs
+/.opencode/agents/frontend/
+/.opencode/skills/
+# frontend external skills: installed from origin repos into .agents/skills
+# and copied into .opencode/skills by frontend/scripts/sync-skills.mjs
+/.agents/skills/gsap-*
+/.agents/skills/make-interfaces-feel-better/
+/.agents/skills/modern-web-guidance/
+/.agents/skills/transitions-*/

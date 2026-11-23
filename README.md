@@ -16,6 +16,7 @@ AI coding assistants waste tokens when every project re-invents its harness. Cru
 - MCP servers configured and distributed by the CruzNess plugin.
 - Base agents for common development tasks.
 - Local OpenCode plugin for project notification preferences.
+- Optional frontend package (UI + SEO + analytics agents, MCPs, skills), off unless enabled.
 - `cruzness.yml` for project-level CruzNess preferences.
 
 Acceptance criteria: [PRD FR-001..FR-004](PRD.md#21-functional-requirements).
@@ -71,10 +72,37 @@ notifications:
   task_complete: true
 ```
 
-The local CruzNess OpenCode plugin reads this file and listens for task completion. Notifications appear when the TUI is blurred, subject to operating-system notification settings. OpenCode Desktop's own notifications remain independently controlled by its app and operating-system settings.
+The local CruzNess OpenCode plugin reads this file from its TUI part and listens for task completion. Notifications appear when the TUI is blurred, subject to operating-system notification settings. OpenCode Desktop's own notifications remain independently controlled by its app and operating-system settings.
 
 The plugin also registers CruzNess's MCP servers, so projects only need to load the plugin; server definitions stay with the harness.
 The GitHub MCP reads `GITHUB_PERSONAL_ACCESS_TOKEN` from the OpenCode process environment and remains disabled when it is unset.
+
+### Frontend package (optional)
+
+`frontend: true` enables UI, SEO and analytics agents and starts the bundled
+`browse`, `imagetooling` and Storybook MCPs. It is off by default. Run
+`node frontend/scripts/sync-frontend.mjs` after changing the flag to copy the
+agents and vendored skills into `.opencode/` (or remove them). Use
+`frontendTools` to add one SEO MCP and one or more analytics or UI MCPs:
+
+```yaml
+frontend: true
+frontendTools:
+  seo:
+    name: my-seo
+    type: remote
+    url: https://example.test/mcp
+  analytics:
+    - name: my-analytics
+      type: remote
+      url: https://example.test/mcp
+    - name: my-traffic
+      type: remote
+      url: https://example.test/mcp
+```
+
+See the [frontend guide](frontend/README.md) for Storybook prerequisites, role
+permissions, and how to provide credentials without committing them.
 
 ## Vision
 

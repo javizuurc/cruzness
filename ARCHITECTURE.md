@@ -56,14 +56,23 @@ A simplified view of the folder structure.
   cruzness.yml.example # tracked project preference template
   agents/           # base agents, one line purpose each (FR-003)
   skills/           # base skills (find-skills, doc-design, work-unit-commits, skill-*)
+  frontend/         # optional frontend package (UI + SEO + analytics), independent of core
+  frontend/agents/  # ui + seo + analytics specialists, disjoint MCP allowlists
+  frontend/skills/  # REGISTRY.md, skills-lock.json, sync scripts, vendored wrappers
+  .opencode/skills/ # vendored frontend-design + design-taste-frontend (+ on-demand externals)
 ```
 
 - [`README.md`](README.md): how to clone and copy the baseline ([FR-001](PRD.md#21-functional-requirements)).
 - [`PRD.md`](PRD.md): frozen v1 scope and acceptance criteria.
 - `ARCHITECTURE.md`: this overview, kept in sync with the two above.
 - `.opencode/plugins/` + `agents/`: auto-discovered harness plugins and agents.
+- `frontend/`: optional UI/SEO package; `cruzness.frontend` registers its MCPs
+  only when `frontend` is true, and `frontend/scripts/sync-frontend.mjs`
+  materializes or removes its agents and skills. OpenCode registers file-based
+  agents and skills after every plugin setup, so a plugin cannot see, add, or
+  remove them in V2.
 - `cruzness.yml.example`: tracked template; the local `cruzness.yml` is Git-ignored.
-- `.opencode/plugins/cruzness/`: local OpenCode plugin that reads the preference and handles notifications.
+- `.opencode/plugins/cruzness-notifications/`: local OpenCode plugin whose `tui.js` part reads the preference and handles notifications. Flat files under `.opencode/plugins/` load as server parts and cannot use the TUI context.
 
 ## 04 Data Flow
 
@@ -71,9 +80,13 @@ CruzNess has no standalone runtime. Execution behaviour belongs to opencode; its
 
 1. Developer copies the baseline into a target project, installs npm dependencies, and copies `cruzness.yml.example` to `cruzness.yml`.
 2. OpenCode loads its project config and CruzNess plugin; the plugin registers its MCP servers and reads the local YAML.
-3. The developer invokes an agent; OpenCode executes the task.
-4. If enabled, the plugin sends a system notification after successful task completion.
-5. A reference task is compared before/after to verify token saving ([metrics](PRD.md#4-success-metrics)).
+3. `frontend/scripts/sync-frontend.mjs` copies the frontend agents and vendored
+   skills into `.opencode/` when `frontend` is true, or removes them when it is
+   false. The `cruzness.frontend` plugin registers the frontend MCPs only when
+   `frontend` is true; otherwise the package costs nothing.
+4. The developer invokes an agent; OpenCode executes the task.
+5. If enabled, the notification plugin sends a system notification after successful task completion.
+6. A reference task is compared before/after to verify token saving ([metrics](PRD.md#4-success-metrics)).
 
 ## 05 Scalability & Future Considerations
 
